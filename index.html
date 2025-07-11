@@ -1,0 +1,96 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allmobill Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-600 w-full py-8 text-white text-center">
+        <h1 class="text-4xl md:text-5xl font-bold animate-fade-in">Allmobill Analytics</h1>
+        <p class="mt-4 text-lg md:text-xl animate-fade-in" style="animation-delay: 0.2s;">
+            מערכת ניתוח מכירות רכבים מתקדמת
+        </p>
+    </header>
+
+    <section class="max-w-4xl mx-auto my-12 px-4 animate-fade-in" style="animation-delay: 0.4s;">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">אודות המערכת</h2>
+        <p class="text-gray-600 leading-relaxed">
+            Allmobill Analytics היא מערכת חדשנית לניתוח נתוני מכירות רכבים עבור חברת Allmobill, המייבאת ומשווקת רכבים של מותגים מובילים כמו Mercedes, Hyundai ו-Mitsubishi. המערכת מספקת תובנות ויזואליות באמצעות Tableau, תומכת בקבלת החלטות אסטרטגיות, ניהוליות ותפעוליות, ומאפשרת ניהול יעיל של מלאי, שיווק ושיפור חוויית הלקוח.
+        </p>
+    </section>
+
+    <section class="max-w-4xl mx-auto my-12 px-4">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center animate-fade-in" style="animation-delay: 0.6s;">גישה ללוחות המחוונים</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="dash1.html" class="btn bg-blue-500 text-white py-4 px-6 rounded-lg text-center font-semibold hover:bg-blue-600 transition-colors animate-fade-in" style="animation-delay: 0.8s;">
+                מערכת אסטרטגית
+            </a>
+            <a href="dash2.html" class="btn bg-green-500 text-white py-4 px-6 rounded-lg text-center font-semibold hover:bg-green-600 transition-colors animate-fade-in" style="animation-delay: 1s;">
+                מערכת ניהולית
+            </a>
+            <a href="dash3.html" class="btn bg-purple-500 text-white py-4 px-6 rounded-lg text-center font-semibold hover:bg-purple-600 transition-colors animate-fade-in" style="animation-delay: 1.2s;">
+                מערכת תפעולית
+            </a>
+        </div>
+    </section>
+
+    <footer class="bg-gray-800 w-full py-4 text-white text-center mt-auto">
+        <p>© 2025 Allmobill. כל הזכויות שמורות.</p>
+    </footer>
+</body>
+</html>
